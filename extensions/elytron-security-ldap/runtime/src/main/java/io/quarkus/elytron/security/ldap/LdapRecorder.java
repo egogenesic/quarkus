@@ -7,10 +7,12 @@ import javax.naming.NamingException;
 import javax.naming.directory.DirContext;
 
 import org.wildfly.common.function.ExceptionSupplier;
+import org.wildfly.security.auth.realm.CachingSecurityRealm;
 import org.wildfly.security.auth.realm.ldap.AttributeMapping;
 import org.wildfly.security.auth.realm.ldap.DirContextFactory;
 import org.wildfly.security.auth.realm.ldap.LdapSecurityRealmBuilder;
 import org.wildfly.security.auth.server.SecurityRealm;
+import org.wildfly.security.cache.LRURealmIdentityCache;
 
 import io.quarkus.elytron.security.ldap.config.AttributeMappingConfig;
 import io.quarkus.elytron.security.ldap.config.DirContextConfig;
@@ -47,7 +49,14 @@ public class LdapRecorder {
             ldapSecurityRealmBuilder.addDirectEvidenceVerification(false);
         }
 
-        return new RuntimeValue<>(ldapSecurityRealmBuilder.build());
+        SecurityRealm ldapRealm = ldapSecurityRealmBuilder.build();
+
+        if (runtimeConfig.cachingEnabled) {
+            ldapRealm = new CachingSecurityRealm(ldapRealm,
+                    new LRURealmIdentityCache(runtimeConfig.maxCacheSize, runtimeConfig.maxAge.toMillis()));
+        }
+
+        return new RuntimeValue<>(ldapRealm);
     }
 
     private ExceptionSupplier<DirContext, NamingException> createDirContextSupplier(DirContextConfig dirContext) {

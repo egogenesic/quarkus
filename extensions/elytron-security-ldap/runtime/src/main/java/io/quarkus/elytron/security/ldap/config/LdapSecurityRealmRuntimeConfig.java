@@ -1,5 +1,7 @@
 package io.quarkus.elytron.security.ldap.config;
 
+import java.time.Duration;
+
 import io.quarkus.runtime.annotations.ConfigItem;
 import io.quarkus.runtime.annotations.ConfigPhase;
 import io.quarkus.runtime.annotations.ConfigRoot;
@@ -18,6 +20,24 @@ public class LdapSecurityRealmRuntimeConfig {
     public boolean directVerification;
 
     /**
+     * Set whether security realm caching is enabled.
+     */
+    @ConfigItem(defaultValue = "true")
+    public boolean cachingEnabled;
+
+    /**
+     * Set value for max age in caching the security realm. The default is {@code 30} minutes.
+     */
+    @ConfigItem(defaultValue = "30M")
+    public Duration maxAge;
+
+    /**
+     * Set the max cache size.
+     */
+    @ConfigItem(defaultValue = "10000")
+    public int maxCacheSize;
+
+    /**
      * The ldap server configuration
      */
     @ConfigItem
@@ -33,6 +53,9 @@ public class LdapSecurityRealmRuntimeConfig {
     public String toString() {
         return "LdapSecurityRealmRuntimeConfig{" +
                 "directVerification=" + directVerification +
+                "cachingEnabled=" + cachingEnabled +
+                "maxAge=" + maxAge +
+                "maxCacheSize=" + maxCacheSize +
                 ", dirContext=" + dirContext +
                 ", identityMapping=" + identityMapping +
                 '}';
